@@ -1,0 +1,13 @@
+---
+controller_job_templates:
+  - name: "Run Example Playbook"
+    organization: "Example Organization"
+    project: "Example Playbooks"
+    playbook: "site.yml"
+    inventory: "Example Inventory"
+    credentials:
+      - "Example Machine Credential"
+      - "Example Vault Credential"
+    execution_environment: "Example Execution Environment"
+    job_type: "run"
+...

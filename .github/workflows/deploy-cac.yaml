@@ -1,0 +1,28 @@
+name: Deploy Controller Configuration
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python and Install Ansible
+        env:
+          ANSIBLE_GALAXY_SERVER_AUTOMATION_HUB_TOKEN: "${{ secrets.AUTOMATION_HUB_TOKEN }}"
+        run: |
+          pip install ansible awxkit pytz python-dateutil
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run Configuration as Code Playbook
+        env:
+          CONTROLLER_HOST: "${{ secrets.CONTROLLER_HOST }}"
+          CONTROLLER_USERNAME: "${{ secrets.CONTROLLER_USERNAME }}"
+          CONTROLLER_PASSWORD: "${{ secrets.CONTROLLER_PASSWORD }}"
+          CONTROLLER_OPTIONAL_API_URLPATTERN_PREFIX: "/api/"
+          MACHINE_SSH_PRIVATE_KEY: "${{ secrets.MACHINE_SSH_PRIVATE_KEY }}"
+          ANSIBLE_VAULT_PASSWORD: "${{ secrets.ANSIBLE_VAULT_PASSWORD }}"
+        run: |
+          ansible-playbook -i inventory.yaml playbooks/deploy-platform.yml

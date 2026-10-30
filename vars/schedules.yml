@@ -1,0 +1,9 @@
+---
+controller_schedules:
+  - name: "Weekly Example Job"
+    unified_job_template: "Run Example Playbook"
+    rrule: >-
+      {{ lookup('ansible.controller.schedule_rrule', 'week', every=1,
+      on_days='tuesday', start_date='2026-11-03 03:00:00', timezone='UTC') }}
+    enabled: false
+...

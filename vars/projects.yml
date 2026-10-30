@@ -1,0 +1,17 @@
+---
+controller_projects:
+  - name: "Example Playbooks"
+    organization: "Example Organization"
+    scm_type: "git"
+    scm_url: "https://github.com/your-org/ansible-playbooks.git"
+    scm_branch: "main"
+    scm_update_on_launch: true
+    wait: true
+  - name: "Example Inventory"
+    organization: "Example Organization"
+    scm_type: "git"
+    scm_url: "https://github.com/your-org/ansible-inventory.git"
+    scm_branch: "main"
+    scm_update_on_launch: true
+    wait: true
+...

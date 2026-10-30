@@ -1,0 +1,163 @@
+---
+- name: Deploy Ascender Configuration as Code
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Load all variable files from the vars directory.
+      ansible.builtin.include_vars:
+        dir: ../vars
+        extensions:
+          - yml
+          - yaml
+
+    - name: Ensure Organizations are defined
+      ansible.controller.organization:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_organizations }}"
+      tags: [orgs]
+
+    - name: Ensure Teams are defined
+      ansible.controller.team:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        description: "{{ item.description }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_teams }}"
+      tags: [teams]
+
+    - name: Ensure Controller users are defined
+      ansible.controller.user:
+        username: "{{ item.username }}"
+        is_superuser: "{{ item.is_superuser }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_users }}"
+      tags: [users]
+
+    - name: Ensure Machine and Token Credentials exist
+      ansible.controller.credential:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        credential_type: "{{ item.credential_type }}"
+        inputs: "{{ item.inputs }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_credentials }}"
+      no_log: true
+      tags: [credentials]
+
+    - name: Ensure SCM projects are defined
+      ansible.controller.project:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        scm_type: "{{ item.scm_type }}"
+        scm_url: "{{ item.scm_url }}"
+        scm_branch: "{{ item.scm_branch }}"
+        scm_update_on_launch: "{{ item.scm_update_on_launch }}"
+        wait: "{{ item.wait }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_projects }}"
+      tags: [projects]
+
+    - name: Ensure execution environments are defined
+      ansible.controller.execution_environment:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        organization: "{{ item.organization }}"
+        pull: "{{ item.pull }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_execution_environments }}"
+      tags: [execution_environments]
+
+    - name: Ensure inventories are defined
+      ansible.controller.inventory:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        description: "{{ item.description }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_inventories }}"
+      tags: [inventories]
+
+    - name: Ensure SCM inventory sources are defined
+      ansible.controller.inventory_source:
+        name: "{{ item.name }}"
+        inventory: "{{ item.inventory }}"
+        organization: "{{ item.organization }}"
+        source: "{{ item.source }}"
+        source_project: "{{ item.source_project }}"
+        source_path: "{{ item.source_path }}"
+        overwrite: "{{ item.overwrite }}"
+        overwrite_vars: "{{ item.overwrite_vars }}"
+        update_on_launch: "{{ item.update_on_launch }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_inventory_sources }}"
+      tags: [inventory_sources]
+
+    - name: Ensure job templates are defined
+      ansible.controller.job_template:
+        name: "{{ item.name }}"
+        organization: "{{ item.organization }}"
+        project: "{{ item.project }}"
+        playbook: "{{ item.playbook }}"
+        inventory: "{{ item.inventory }}"
+        credentials: "{{ item.credentials }}"
+        execution_environment: "{{ item.execution_environment | default(omit) }}"
+        limit: "{{ item.limit | default(omit) }}"
+        job_tags: "{{ item.job_tags | default(omit) }}"
+        job_type: "{{ item.job_type }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_job_templates }}"
+      tags: [job_templates]
+
+    - name: Ensure schedules are defined
+      ansible.controller.schedule:
+        name: "{{ item.name }}"
+        unified_job_template: "{{ item.unified_job_template }}"
+        rrule: "{{ item.rrule }}"
+        enabled: "{{ item.enabled }}"
+        state: present
+        controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+        controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+        controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+        validate_certs: true
+      loop: "{{ controller_schedules }}"
+      tags: [schedules]
+...

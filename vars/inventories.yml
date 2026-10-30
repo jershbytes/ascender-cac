@@ -1,0 +1,17 @@
+---
+controller_inventories:
+  - name: "Example Inventory"
+    organization: "Example Organization"
+    description: "Inventory synchronized from the example inventory repository"
+
+controller_inventory_sources:
+  - name: "Example Inventory Source"
+    inventory: "Example Inventory"
+    organization: "Example Organization"
+    source: "scm"
+    source_project: "Ansible Inventory"
+    source_path: "hosts.ini"
+    overwrite: true
+    overwrite_vars: true
+    update_on_launch: true
+...

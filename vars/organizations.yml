@@ -1,0 +1,12 @@
+---
+controller_organizations:
+  - name: "Example Organization"
+    description: "Example organization for controller configuration"
+
+controller_teams:
+  - name: "Automation Operators"
+    organization: "Example Organization"
+    description: "Example team for controller configuration"
+
+controller_users: []
+...
